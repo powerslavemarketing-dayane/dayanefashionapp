@@ -1,0 +1,501 @@
+
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DAYANE FASHION APP - VOCÊ BONITA, SEMPRE.</title>
+    <!-- Carrega Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Configuração de fonte global para Inter */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Fundo alterado para rosa claro */
+            background-color: #fdf2f8; /* Pink 50 */
+            /* Adicionando o padrão de flores brancas em contorno (Clipart Style) */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='3'%3E%3Ccircle cx='50' cy='50' r='10'/%3E%3Cpath d='M50 50 L 50 20 M50 50 L 75 35 M50 50 L 80 50 M50 50 L 75 65 M50 50 L 50 80 M50 50 L 25 65 M50 50 L 20 50 M50 50 L 25 35'/%3E%3C/g%3E%3C/svg%3E");
+            background-size: 80px 80px; /* Define o tamanho da repetição */
+            background-repeat: repeat;
+        }
+
+        /* Estilos modernos para as caixas de upload */
+        .drop-area {
+            border: 2px dashed #D1D5DB; /* Gray 300 - Clean default border */
+            transition: all 0.3s ease-in-out;
+            cursor: pointer;
+            background-color: #ffffff;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05); /* Subtle shadow */
+        }
+        .drop-area-hover {
+            border-color: #E91E63; /* New Primary Pink */
+            background-color: #FEE7F6; /* Very light pink hover state */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        /* Estilo para a barra de progresso */
+        .progress-bar {
+            height: 6px; /* Mais fino */
+            background-color: #FEE7F6;
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: #E91E63; /* New Primary Pink */
+            width: 0;
+            transition: width 0.4s ease-out;
+        }
+    </style>
+    <!-- Configuração do Tailwind para usar cores e arredondamentos modernos -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#E91E63', /* Deep Berry Pink - Modern and professional */
+                        'secondary': '#FFC0CB', /* Light Pink for accents */
+                        'background': '#fdf2f8', /* Cor do fundo do body (pink-50) */
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4 sm:p-8">
+
+    <!-- Container Principal do Aplicativo -->
+    <div class="w-full max-w-7xl bg-white shadow-xl rounded-2xl p-6 sm:p-12 border border-gray-100">
+
+        <!-- Cabeçalho (Header) -->
+        <header class="text-center mb-12">
+            <!-- Título Principal (com fontes menores) -->
+            <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-2 tracking-tight">DAYANE FASHION APP</h1>
+            <!-- Slogan Atualizado (com fontes menores) -->
+            <p class="text-lg text-primary font-medium italic mt-1">Você linda, sempre.</p>
+            <hr class="mt-6 border-t-3 border-gray-200">
+        </header>
+
+        <!-- Área Principal com 3 Etapas (Layout mais espaçoso) -->
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
+            
+            <!-- Etapa 1: Upload da Modelo (Pessoa) -->
+            <section class="lg:col-span-1 p-6 bg-gray-50 rounded-xl shadow-md border border-gray-200">
+                <!-- Título da Seção -->
+                <h2 class="text-xl font-bold mb-5 text-gray-700 flex items-center">
+                    <span class="inline-flex items-center justify-center w-8 h-8 mr-3 text-white bg-primary rounded-full font-extrabold shadow-md">1</span>
+                    Modelo (Pessoa)
+                </h2>
+                <div id="modelDropArea" class="drop-area h-72 flex flex-col items-center justify-center p-6 rounded-xl transition-colors duration-300">
+                    <input type="file" id="modelFileInput" accept="image/*" class="hidden">
+                    <div id="modelPreviewContainer" class="text-center p-4">
+                        <svg class="w-12 h-12 mb-3 text-primary mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                        <p class="text-sm text-gray-600 font-medium">Arraste a imagem do corpo completo ou <span class="text-primary font-bold hover:underline">clique para selecionar</span></p>
+                    </div>
+                    <img id="modelImagePreview" src="" alt="Prévia da Modelo" class="hidden max-h-full max-w-full object-contain mt-2 rounded-lg shadow-lg border border-gray-200">
+                </div>
+            </section>
+
+            <!-- Etapa 2: Upload da Roupa (Item) -->
+            <section class="lg:col-span-1 p-6 bg-gray-50 rounded-xl shadow-md border border-gray-200">
+                <!-- Título da Seção -->
+                <h2 class="text-xl font-bold mb-5 text-gray-700 flex items-center">
+                    <span class="inline-flex items-center justify-center w-8 h-8 mr-3 text-white bg-primary rounded-full font-extrabold shadow-md">2</span>
+                    Roupa (Item)
+                </h2>
+                <div id="itemDropArea" class="drop-area h-72 flex flex-col items-center justify-center p-6 rounded-xl transition-colors duration-300">
+                    <input type="file" id="itemFileInput" accept="image/*" class="hidden">
+                    <div id="itemPreviewContainer" class="text-center p-4">
+                        <svg class="w-12 h-12 mb-3 text-primary mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l3 9a2 2 0 002 2h5a2 2 0 002-2l3-9m-7 0a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                        <p class="text-sm text-gray-600 font-medium">Arraste a imagem da peça de roupa ou <span class="text-primary font-bold hover:underline">clique para selecionar</span></p>
+                    </div>
+                    <img id="itemImagePreview" src="" alt="Prévia da Roupa" class="hidden max-h-full max-w-full object-contain mt-2 rounded-lg shadow-lg border border-gray-200">
+                </div>
+            </section>
+
+            <!-- Etapa 3: Descrição de Estilo e Ações -->
+            <section class="lg:col-span-1 p-6 bg-gray-50 rounded-xl shadow-md border border-gray-200">
+                <!-- Título da Seção -->
+                <h2 class="text-xl font-bold mb-5 text-gray-700 flex items-center">
+                    <span class="inline-flex items-center justify-center w-8 h-8 mr-3 text-white bg-primary rounded-full font-extrabold shadow-md">3</span>
+                    Estilo e Cena
+                </h2>
+                <textarea id="styleDescription" rows="4" placeholder="Ex: Adicione iluminação de estúdio suave, fundo de paisagem urbana, pose casual, fotorrealista..."
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition duration-200 resize-none text-gray-700 placeholder-gray-400 focus:outline-none"></textarea>
+                
+                <!-- Botão Auxiliar para Sugestões -->
+                <button id="suggestStyleBtn" type="button"
+                    class="w-full mt-4 py-3 px-4 bg-secondary text-gray-800 font-bold rounded-xl hover:bg-pink-300 transition duration-300 ease-in-out shadow-sm transform hover:scale-[1.01] active:scale-95 border border-secondary">
+                    Sugestões de Fotografia e Estilo
+                </button>
+                
+                <!-- Botão Principal para Gerar a Imagem (CTA Moderno) -->
+                <button id="generateBtn" type="button" disabled
+                    class="w-full mt-5 py-4 px-4 bg-primary text-white font-extrabold text-lg rounded-xl transition duration-300 ease-in-out shadow-2xl shadow-primary/50 hover:bg-pink-700 disabled:bg-gray-400 disabled:shadow-none disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-95">
+                    Gerar Prova Virtual
+                </button>
+            </section>
+        </main>
+
+        <!-- Seção de Status e Resultado (Visual mais limpo) -->
+        <section class="mt-12 p-8 bg-gray-50 rounded-xl shadow-lg border border-gray-200">
+            <h2 class="text-2xl font-bold mb-4 text-gray-700 text-center">Resultado da Prova Virtual</h2>
+
+            <!-- Área de Status/Mensagens -->
+            <div id="statusArea" class="mb-6">
+                <p id="statusMessage" class="text-center text-gray-600 font-medium text-base">Aguardando as imagens para iniciar o processo.</p>
+                <div id="progressBarContainer" class="progress-bar mt-3 hidden">
+                    <div id="progressBarFill" class="progress-fill"></div>
+                </div>
+            </div>
+
+            <!-- Área de Resultado da Imagem -->
+            <div id="resultArea" class="hidden flex flex-col items-center">
+                <img id="finalImage" src="" alt="Resultado da Prova Virtual" class="w-full max-w-2xl h-auto rounded-xl shadow-2xl border-4 border-primary/50 object-contain mb-8">
+                
+                <div class="flex space-x-6">
+                    <!-- Botão de Download -->
+                    <button id="downloadBtn" class="py-3 px-8 bg-green-500 text-white font-bold rounded-xl hover:bg-green-600 transition duration-300 ease-in-out shadow-lg transform hover:scale-105 active:scale-95">
+                        Baixar Imagem (PNG)
+                    </button>
+                    <!-- Botão de Reset -->
+                    <button id="resetBtn" class="py-3 px-8 bg-gray-600 text-white font-bold rounded-xl hover:bg-gray-700 transition duration-300 ease-in-out shadow-lg transform hover:scale-105 active:scale-95">
+                        Fazer Nova Prova
+                    </button>
+                </div>
+                
+                <!-- Fonte/Citação (Exigido pelo uso de ferramentas de pesquisa/geração) -->
+                <div id="citationArea" class="mt-6 text-sm text-gray-500 italic hidden">
+                    <p>Conteúdo gerado por IA. Modelo: gemini-2.5-flash-image-preview</p>
+                    <ul id="sourceList" class="text-xs mt-1 list-disc list-inside">
+                        <!-- Fontes de citação aparecerão aqui se houver alguma -->
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </div>
+    
+    <!-- Rodapé (Footer) -->
+    <footer class="mt-10 text-center text-gray-500 text-sm p-4 w-full">
+        <p>Copyright 2025 - Dayane Fashion App - Todos os direitos reservados.</p>
+        <p class="mt-1">Desenvolvido por Dayane do Aloha</p>
+    </footer>
+
+    <!-- Script principal da aplicação -->
+    <script>
+        // Variáveis globais de ambiente (configuração para PROXY SEGURO no Netlify)
+        const API_KEY = ""; // Esta chave NUNCA será usada, mas mantida como placeholder para evitar erros.
+
+        // URLs AGORA apontam para o nosso PROXY de Backend (Netlify Functions)
+        const IMAGE_GENERATION_URL = '/.netlify/functions/generate-image';
+        const SUGGESTION_URL = '/.netlify/functions/get-suggestion';
+
+        // Estado do App
+        const appState = {
+            modelBase64: null,
+            itemBase64: null,
+            modelMimeType: null,
+            itemMimeType: null,
+            isGenerating: false,
+        };
+
+        // Elementos DOM
+        const modelDropArea = document.getElementById('modelDropArea');
+        const modelFileInput = document.getElementById('modelFileInput');
+        const modelImagePreview = document.getElementById('modelImagePreview');
+        const modelPreviewContainer = document.getElementById('modelPreviewContainer');
+        
+        const itemDropArea = document.getElementById('itemDropArea');
+        const itemFileInput = document.getElementById('itemFileInput');
+        const itemImagePreview = document.getElementById('itemImagePreview');
+        const itemPreviewContainer = document.getElementById('itemPreviewContainer');
+        
+        const styleDescription = document.getElementById('styleDescription');
+        const suggestStyleBtn = document.getElementById('suggestStyleBtn');
+        const generateBtn = document.getElementById('generateBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        const statusMessage = document.getElementById('statusMessage');
+        const progressBarContainer = document.getElementById('progressBarContainer');
+        const progressBarFill = document.getElementById('progressBarFill');
+        const resultArea = document.getElementById('resultArea');
+        const finalImage = document.getElementById('finalImage');
+        const citationArea = document.getElementById('citationArea');
+
+        // --- Funções Auxiliares ---
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const base64String = reader.result.split(',')[1];
+                    resolve({ base64: base64String, mimeType: file.type });
+                };
+                reader.onerror = error => reject(error);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function updateGenerateButtonState() {
+            const isReady = appState.modelBase64 && appState.itemBase64 && !appState.isGenerating;
+            generateBtn.disabled = !isReady;
+        }
+
+        function setStatus(message, type = 'info', progress = 0) {
+            statusMessage.textContent = message;
+            statusMessage.className = 'text-center font-medium text-base';
+            citationArea.classList.add('hidden');
+            progressBarContainer.classList.add('hidden');
+            
+            switch (type) {
+                case 'loading':
+                    statusMessage.classList.add('text-primary');
+                    progressBarContainer.classList.remove('hidden');
+                    progressBarFill.style.width = `${progress}%`;
+                    break;
+                case 'success':
+                    statusMessage.classList.add('text-green-600');
+                    break;
+                case 'error':
+                    statusMessage.classList.add('text-red-600');
+                    break;
+                case 'info':
+                default:
+                    statusMessage.classList.add('text-gray-600');
+                    break;
+            }
+        }
+
+        function setupDropArea(dropArea, fileInput, imagePreview, previewContainer, type) {
+            const processFile = async (file) => {
+                if (file && file.type.startsWith('image/')) {
+                    try {
+                        setStatus('Processando imagem...', 'info');
+                        const result = await fileToBase64(file);
+                        
+                        imagePreview.src = `data:${result.mimeType};base64,${result.base64}`;
+                        imagePreview.classList.remove('hidden');
+                        previewContainer.classList.add('hidden');
+
+                        if (type === 'model') {
+                            appState.modelBase64 = result.base64;
+                            appState.modelMimeType = result.mimeType;
+                        } else {
+                            appState.itemBase64 = result.base64;
+                            appState.itemMimeType = result.mimeType;
+                        }
+                        setStatus('Imagens prontas para a geração.', 'success');
+                        updateGenerateButtonState();
+                    } catch (error) {
+                        setStatus('Erro ao ler a imagem. Tente novamente.', 'error');
+                        console.error('Erro ao processar arquivo:', error);
+                    }
+                } else {
+                    setStatus('Por favor, selecione um arquivo de imagem válido.', 'error');
+                }
+            };
+
+            dropArea.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    processFile(e.target.files[0]);
+                }
+            });
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropArea.addEventListener(eventName, () => dropArea.classList.add('drop-area-hover'), false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, () => dropArea.classList.remove('drop-area-hover'), false);
+            });
+
+            dropArea.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files.length > 0) {
+                    processFile(files[0]);
+                }
+            }, false);
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }
+
+        setupDropArea(modelDropArea, modelFileInput, modelImagePreview, modelPreviewContainer, 'model');
+        setupDropArea(itemDropArea, itemFileInput, itemImagePreview, itemPreviewContainer, 'item');
+
+        // --- Lógica de Sugestão de Estilo (CHAMA O PROXY) ---
+
+        suggestStyleBtn.addEventListener('click', async () => {
+            if (appState.isGenerating) return;
+
+            setStatus('Gerando sugestão de estilo...', 'loading', 50);
+            
+            const prompt = "Gere uma breve descrição (máximo 2 frases) de um estilo fotorrealista para uma prova virtual de roupas. Concentre-se em iluminação, cenário e pose. Não use marcações de lista.";
+            
+            await new Promise(resolve => setTimeout(resolve, 100)); 
+            
+            try {
+                // CHAMA O ENDPOINT DE PROXY /api/get-suggestion
+                const response = await fetch(SUGGESTION_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    // Envia apenas o prompt para o backend
+                    body: JSON.stringify({ prompt: prompt }),
+                });
+
+                if (!response.ok) throw new Error(`Erro HTTP! status: ${response.status}`);
+                const result = await response.json();
+                const suggestion = result.text; // O backend devolve o texto diretamente
+
+                if (suggestion) {
+                    styleDescription.value = suggestion.trim();
+                    setStatus('Sugestão de estilo carregada.', 'info');
+                } else {
+                    throw new Error("Resposta de sugestão vazia.");
+                }
+
+            } catch (error) {
+                setStatus('Erro ao obter sugestão de estilo. Verifique a conexão com o servidor.', 'error');
+                console.error("Erro na API de Sugestão:", error);
+            }
+        });
+
+
+        // --- Lógica de Geração de Imagem (CHAMA O PROXY) ---
+
+        generateBtn.addEventListener('click', async () => {
+            if (!appState.modelBase64 || !appState.itemBase64 || appState.isGenerating) {
+                setStatus('Por favor, carregue a imagem da Modelo e da Roupa.', 'error');
+                return;
+            }
+
+            appState.isGenerating = true;
+            updateGenerateButtonState();
+            resultArea.classList.add('hidden');
+            citationArea.classList.add('hidden');
+            
+            setStatus('Iniciando geração da imagem. Isso pode levar alguns segundos...', 'loading', 10);
+            
+            const stylePrompt = styleDescription.value.trim() || "Cena com iluminação de estúdio profissional e fundo minimalista. Pose confiante e estilo fotorrealista de alta definição.";
+            
+            const fullPrompt = `Gere uma imagem fotorrealista de uma **prova virtual**. A pessoa na primeira imagem (Modelo) deve estar usando a roupa da segunda imagem (Roupa/Item). A roupa deve ser perfeitamente integrada ao corpo da pessoa. Mantenha as características da pessoa. Aplique o seguinte estilo: "${stylePrompt}". O resultado final deve ser uma foto de moda de alta qualidade e totalmente realista.`;
+
+            // Payload que será enviado para a Netlify Function
+            const payload = {
+                fullPrompt: fullPrompt,
+                modelImage: { data: appState.modelBase64, mimeType: appState.modelMimeType },
+                itemImage: { data: appState.itemBase64, mimeType: appState.itemMimeType }
+            };
+            
+            setStatus('Carregando dados para a IA...', 'loading', 30);
+
+            const MAX_RETRIES = 5;
+            let currentRetry = 0;
+            let success = false;
+
+            while (currentRetry < MAX_RETRIES && !success) {
+                try {
+                    setStatus(`Gerando imagem (Tentativa ${currentRetry + 1}/${MAX_RETRIES})...`, 'loading', 50 + currentRetry * 10);
+                    
+                    // CHAMA O ENDPOINT DE PROXY /api/generate-image
+                    const response = await fetch(IMAGE_GENERATION_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload) // Envia o payload simplificado
+                    });
+
+                    if (!response.ok) {
+                        if (response.status === 429) { 
+                            throw new Error('Limite de taxa atingido (429)');
+                        }
+                        throw new Error(`Erro HTTP! status: ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+                    const base64Data = result?.base64Image; // O backend devolve a imagem com esta chave
+
+                    if (base64Data) {
+                        const imageUrl = `data:image/png;base64,${base64Data}`;
+                        finalImage.src = imageUrl;
+                        resultArea.classList.remove('hidden');
+                        setStatus('Imagem gerada com sucesso!', 'success', 100);
+                        success = true;
+                        
+                        citationArea.classList.remove('hidden');
+
+                    } else {
+                        throw new Error("O servidor não retornou dados de imagem válidos.");
+                    }
+
+                } catch (error) {
+                    console.error("Erro na geração da imagem:", error);
+                    currentRetry++;
+                    if (currentRetry < MAX_RETRIES) {
+                        const delay = Math.pow(2, currentRetry) * 1000; 
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    } else {
+                        setStatus('Falha na geração da imagem após várias tentativas. Erro no servidor.', 'error');
+                    }
+                }
+            }
+            
+            appState.isGenerating = false;
+            updateGenerateButtonState();
+            if (!success) {
+                // A chave de API não está no frontend, o erro está no servidor (Netlify Function)
+                setStatus('Falha crítica na geração da imagem. Verifique o log de erros da sua Netlify Function.', 'error');
+            }
+        });
+
+        // --- Lógica de Download e Reset ---
+        
+        downloadBtn.addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.href = finalImage.src;
+            link.download = 'dayane-fashion-app-prova-virtual.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        resetBtn.addEventListener('click', () => {
+            appState.modelBase64 = null;
+            appState.itemBase64 = null;
+            appState.modelMimeType = null;
+            appState.itemMimeType = null;
+            appState.isGenerating = false;
+
+            [modelFileInput, itemFileInput].forEach(el => el.value = '');
+            [modelImagePreview, itemImagePreview, finalImage].forEach(el => el.src = '');
+            
+            modelPreviewContainer.classList.remove('hidden');
+            itemPreviewContainer.classList.remove('hidden');
+            [modelImagePreview, itemImagePreview].forEach(el => el.classList.add('hidden'));
+
+            styleDescription.value = '';
+
+            setStatus('Aguardando as imagens para iniciar o processo.', 'info');
+            resultArea.classList.add('hidden');
+            citationArea.classList.add('hidden');
+            progressBarContainer.classList.add('hidden');
+            
+            updateGenerateButtonState();
+        });
+
+        window.onload = () => {
+             resetBtn.click();
+        };
+    </script>
+</body>
+</html>
