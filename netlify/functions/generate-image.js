@@ -60,7 +60,7 @@ exports.handler = async (event) => {
     // 2. Cria o prompt
     const prompt = `Combine estas duas imagens. Coloque o item de roupa (segunda imagem) na pessoa (primeira imagem). O resultado deve parecer uma foto realística onde a roupa está sendo usada. Mantenha o estilo e a pose do modelo. Use o seguinte estilo: "${stylePrompt}".`;
 
-    // 3. Chamada da API
+    // 3. Chamada da API - MODELO DE IMAGEM RESTAURADO
     const result = await ai.models.generateContent({
       model: 'imagen-3.0-generate-002',
       contents: [
@@ -69,7 +69,6 @@ exports.handler = async (event) => {
         prompt
       ],
       config: {
-        // Gera apenas uma imagem
         sampleCount: 1,
       }
     });
@@ -84,10 +83,12 @@ exports.handler = async (event) => {
     };
   } catch (error) {
     console.error("Erro na função generate-image:", error);
+    // Retorna uma mensagem de erro mais detalhada se for possível
+    const errorMessage = error.message || "Erro desconhecido. Verifique o faturamento do seu projeto Google Cloud.";
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: "Erro interno do servidor. Verifique os logs do Netlify." })
+      body: JSON.stringify({ error: `Falha na geração: ${errorMessage}` })
     };
   }
 };
