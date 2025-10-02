@@ -1,137 +1,93 @@
-// netlify/functions/generate-image.js
-// Este arquivo é uma Netlify Function que atua como um proxy seguro para o Gemini API.
+import { GoogleGenAI } from "@google/genai";
 
-// A chave API é injetada automaticamente pela variável de ambiente NETLIFY_GEMINI_API_KEY
-// configurada no painel do Netlify.
-const API_KEY = process.env.NETLIFY_GEMINI_API_KEY;
-const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${API_KEY}`;
+// A chave de API é injetada automaticamente pelo Netlify a partir da variável de ambiente GEMINI_API_KEY
+// O Netlify usa um 'handler' que expõe a chave através de process.env
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-// Define a função manipuladora (handler) que o Netlify irá executar
-exports.handler = async function(event, context) {
-    // A função só aceita requisições POST
-    if (event.httpMethod !== 'POST') {
-        return {
-            statusCode: 405,
-            body: JSON.stringify({ message: "Método Não Permitido. Use POST." }),
-        };
+// Função auxiliar para converter o Base64 para o formato necessário pela API
+function base64ToGenerativePart(base64Data, mimeType) {
+  // O Netlify envia a imagem como um JSON, que pode conter o prefixo 'data:image/jpeg;base64,'
+  // Removemos o prefixo para obter apenas os dados puros em Base64
+  const data = base64Data.replace(/^data:image\/[a-z]+;base64,/, "");
+  return {
+    inlineData: {
+      data,
+      mimeType,
+    },
+  };
+}
+
+exports.handler = async (event) => {
+  // CORS Headers: Essencial para permitir que o navegador chame a função
+  const headers = {
+    'Access-Control-Allow-Origin': '*', // Permite que o site faça a chamada
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Content-Type': 'application/json'
+  };
+
+  // Lida com requisições OPTIONS (pré-voo do CORS)
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 200,
+      headers
+    };
+  }
+
+  try {
+    const { modelImageBase64, itemImageBase64, stylePrompt } = JSON.parse(event.body);
+
+    if (!process.env.GEMINI_API_KEY) {
+      console.error("GEMINI_API_KEY não está configurada.");
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ error: "Chave de API do Gemini não configurada no servidor." })
+      };
     }
 
-    try {
-        // Analisa o corpo da requisição JSON (enviado pelo frontend)
-        const { fullPrompt, modelImage, itemImage } = JSON.parse(event.body);
-
-        if (!API_KEY) {
-             return {
-                statusCode: 500,
-                body: JSON.stringify({ message: "Chave API não configurada. Verifique as variáveis de ambiente." }),
-            };
-        }
-
-        // Constrói a estrutura de partes (parts) para o payload da API
-        // O modelo image-to-image recebe o texto seguido das imagens
-        const contents = [
-            {
-                role: "user",
-                parts: [
-                    { text: fullPrompt }, // 1. O prompt descrevendo a tarefa
-                    { // 2. A imagem da Modelo (Pessoa)
-                        inlineData: {
-                            mimeType: modelImage.mimeType,
-                            data: modelImage.data
-                        }
-                    },
-                    { // 3. A imagem da Roupa (Item)
-                        inlineData: {
-                            mimeType: itemImage.mimeType,
-                            data: itemImage.data
-                        }
-                    }
-                ]
-            }
-        ];
-
-        const payload = {
-            contents: contents,
-            // Configuração para indicar que a resposta deve incluir uma imagem
-            generationConfig: {
-                responseModalities: ['TEXT', 'IMAGE']
-            },
-        };
-
-        // ----------------------------------------------------
-        // Lógica de Chamada da API com Retentativas (Backoff)
-        // ----------------------------------------------------
-        const MAX_RETRIES = 5;
-        let lastError = null;
-        
-        for (let i = 0; i < MAX_RETRIES; i++) {
-            try {
-                const apiResponse = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                const result = await apiResponse.json();
-
-                if (apiResponse.ok) {
-                    // Extrai os dados da imagem (base64) da resposta
-                    const base64Data = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
-
-                    if (base64Data) {
-                        return {
-                            statusCode: 200,
-                            body: JSON.stringify({ 
-                                base64Image: base64Data, 
-                                message: "Imagem gerada com sucesso." 
-                            }),
-                        };
-                    } else {
-                        // Se a API retornou 200, mas sem imagem, é um erro de conteúdo
-                        throw new Error("Resposta da API Gemini não continha dados de imagem válidos.");
-                    }
-                } else {
-                    // Trata erros de status HTTP (e.g., 400, 500)
-                    const errorDetails = result.error ? result.error.message : 'Erro desconhecido da API.';
-                    console.error(`Erro da API (Status ${apiResponse.status}): ${errorDetails}`);
-                    
-                    if (apiResponse.status === 429) {
-                        // Limite de taxa (Rate Limit), tenta novamente
-                        throw new Error("Limite de taxa atingido (429). Tentando novamente...");
-                    } else {
-                        // Outros erros, talvez não faça sentido tentar novamente, mas faremos
-                        throw new Error(`Erro na chamada da API: ${errorDetails}`);
-                    }
-                }
-            } catch (error) {
-                lastError = error;
-                // Aplica backoff exponencial antes de tentar novamente
-                const delay = Math.pow(2, i) * 1000;
-                if (i < MAX_RETRIES - 1) {
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                }
-            }
-        }
-        
-        // Se todas as retentativas falharem
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ 
-                message: "Falha na comunicação com a API Gemini após várias tentativas.",
-                error: lastError ? lastError.message : "Erro desconhecido."
-            }),
-        };
-
-    } catch (error) {
-        // Trata erros de parsing ou outros erros de execução
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ 
-                message: "Erro interno no servidor ao processar a requisição.", 
-                error: error.message 
-            }),
-        };
+    if (!modelImageBase64 || !itemImageBase64) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: "Imagens do modelo ou item estão faltando." })
+      };
     }
+
+    // 1. Converte as imagens
+    const modelPart = base64ToGenerativePart(modelImageBase64, 'image/jpeg');
+    const itemPart = base64ToGenerativePart(itemImageBase64, 'image/jpeg');
+
+    // 2. Cria o prompt
+    const prompt = `Combine estas duas imagens. Coloque o item de roupa (segunda imagem) na pessoa (primeira imagem). O resultado deve parecer uma foto realística onde a roupa está sendo usada. Mantenha o estilo e a pose do modelo. Use o seguinte estilo: "${stylePrompt}".`;
+
+    // 3. Chamada da API
+    const result = await ai.models.generateContent({
+      model: 'imagen-3.0-generate-002',
+      contents: [
+        modelPart,
+        itemPart,
+        prompt
+      ],
+      config: {
+        // Gera apenas uma imagem
+        sampleCount: 1,
+      }
+    });
+
+    // 4. Retorna a imagem gerada (Base64)
+    const base64Image = result.candidates[0].image.imageBytes;
+
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({ base64Image })
+    };
+  } catch (error) {
+    console.error("Erro na função generate-image:", error);
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({ error: "Erro interno do servidor. Verifique os logs do Netlify." })
+    };
+  }
 };
